@@ -41,6 +41,7 @@ typedef enum{
 @property(nonatomic,strong)NSString * orderid;
 @property(nonatomic,strong)NSString * qstId;
 @property(nonatomic,strong)NSString * tqId;
+@property(nonatomic,strong)NSString * qtype; //题型
 @property(nonatomic,strong)NSString * typeId;
 @property(nonatomic,strong)NSString * parentid;
 @property(nonatomic,strong)NSString * time;

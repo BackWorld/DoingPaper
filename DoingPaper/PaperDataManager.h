@@ -11,8 +11,7 @@
 #import "PaperModel.h"
 
 typedef void(^DownloadPaperSucceedBlock)(PaperModel* paper);
-typedef void(^SendCommentSucceedBlock)(void);
-typedef void(^SubmitPaperSucceedBlock)(void);
+typedef void(^PaperRequestSucceedBlock)(void);
 typedef void(^PaperRequestFinishedBlock)(void);
 typedef void(^PaperRequestFailedBlock)(NSError* error);
 
@@ -25,13 +24,29 @@ typedef void(^PaperRequestFailedBlock)(NSError* error);
 // 加载试卷
 -(PaperModel*)loadPaperWithPaperId: (NSString *)paperId; //本地
 
--(void)downloadPaperWithParam:(PaperParam *)param
+-(void)getPaperWithParam: (PaperParam *)param
                       succeed: (DownloadPaperSucceedBlock)succeedBlock
                      finished: (PaperRequestFinishedBlock)finishedBlock
                        failed: (PaperRequestFailedBlock) failedBlock;
-// 提交答案
--(void)submitPaperAnwserWithDict: (NSDictionary*)dict PaperParam: (PaperParam*)param;
+
+// 查看答题结果
+-(void)scanPaperWithSubmitedPaper:(PaperModel*)paper
+                            Param:(PaperParam *)param
+                          succeed:(PaperRequestSucceedBlock)succeedBlock
+                         finished:(PaperRequestFinishedBlock)finishedBlock
+                           failed:(PaperRequestFailedBlock)failedBlock;
+
+// 提交试卷
+-(void)submitPaperAnwserWithPaper:(PaperModel *)paper
+                       PaperParam:(PaperParam *)param
+                          succeed:(PaperRequestSucceedBlock)succeedBlock
+                         finished:(PaperRequestFinishedBlock)finishedBlock
+                           failed:(PaperRequestFailedBlock)failedBlock;
 // 添加评语
--(void)teacherSendCommentWithText: (NSString*)comment PaperParam: (PaperParam*)param;
+-(void)teacherSendCommentWithText: (NSString*)comment
+                       PaperParam: (PaperParam*)param
+                          succeed:(PaperRequestSucceedBlock)succeedBlock
+                         finished:(PaperRequestFinishedBlock)finishedBlock
+                           failed:(PaperRequestFailedBlock)failedBlock;
 
 @end

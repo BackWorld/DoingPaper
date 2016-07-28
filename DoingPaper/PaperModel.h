@@ -16,6 +16,9 @@
  <paperauthor>海尔老师2</paperauthor>
  <uuid>9303620D-0287-243B-28A1-300FB890A541</uuid>
  */
+
+@property(nonatomic,strong)NSString *usedTime; // 答题所用时间
+@property(nonatomic,strong)NSString* paperId; // _param.
 @property(nonatomic,strong)NSString* title;
 @property(nonatomic,strong)NSString* titme;
 @property(nonatomic,strong)NSString* score;

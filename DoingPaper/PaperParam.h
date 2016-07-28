@@ -41,6 +41,8 @@ status = 0;
 @property(nonatomic,strong)NSString *quizid;
 @property(nonatomic,strong)NSString *simulate_exam_result_id;
 @property(nonatomic,strong)NSString *status;
+@property(nonatomic,strong)NSString *uuid; //学生，教师查看试卷时用
 
+@property(nonatomic,assign)BOOL submited;
 @property(nonatomic,assign)BOOL isTeacher;
 @end

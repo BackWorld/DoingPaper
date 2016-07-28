@@ -33,7 +33,6 @@
     UILabel *indexLabel;
     UILabel *timeLabel;
     UILabel *questionTypeLabel;
-    NSMutableArray *userAnswers;
 }
 
 -(instancetype)initWithParams: (NSDictionary*)dict{
@@ -45,12 +44,12 @@
             @"quizid": @"9303620D-0287-243B-28A1-300FB890A541",
             @"role": @"student",
             @"simulate_exam_result_id": @"112002",
-            @"status":  @"0",
-            @"user_id": @"FAB464C8-5256-6122-BA85-C4E19612CFC5"
+            @"status":  @"1",
+            @"user_id": @"EFDD8B11-3038-137A-0217-C8BCF9D1D384",
+            @"uuid": @"0BD17A83-87C2-0308-3B50-201075BFBDB5"
         };
         _param = [PaperParam new];
         [_param setValuesForKeysWithDictionary: dict];
-        userAnswers = [NSMutableArray new];
         screenW = [UIScreen mainScreen].bounds.size.width;
         screenH = [UIScreen mainScreen].bounds.size.height;
         headViewH = 44;
@@ -63,14 +62,14 @@
     
     [self setupUI];
     
-    [self loadData];
+    [self loadPaper];
 }
 
 -(void)setupUI{
     self.view.backgroundColor = [UIColor whiteColor];
     
     // nav
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"答题卡" style:UIBarButtonItemStylePlain target:self action:@selector(loadData)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"答题卡" style:UIBarButtonItemStylePlain target:self action:@selector(loadPaper)];
     
     [self.view addSubview: self.headView]; // 手动调用 self.才行而不能 _headView
     [self.view addSubview: self.collectionView];
@@ -105,10 +104,16 @@
 
 -(void)setPaper:(PaperModel *)paper{
     if (paper) {
-        _paper = paper;
         self.navigationItem.title = paper.title;
+        _paper = paper;
+        _paper.paperId = _param.simulate_exam_result_id;
         
-        [self.collectionView reloadData];
+        if (_param.submited) { //加载答案
+            [self scanPaper];
+        }
+        else{
+            [self.collectionView reloadData];
+        }
         self.currentIndexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     }
 }
@@ -185,19 +190,39 @@
     return _collectionView;
 }
 
--(void)loadData{
+/**
+ *  答完题浏览
+ */
+-(void)scanPaper{
+    __weak typeof(self) weakSelf = self;
+    [[PaperDataManager sharedManager]scanPaperWithSubmitedPaper:_paper Param:_param succeed:^{
+        [weakSelf.collectionView reloadData];
+    } finished:^{
+        
+    } failed:^(NSError *error) {
+        NSLog(@"get answer error: %@",error.localizedDescription);
+    }];
+}
+
+/**
+ *  加载试题
+ */
+-(void)loadPaper{
     PaperModel *paper = [[PaperDataManager sharedManager] loadPaperWithPaperId:_param.simulate_exam_result_id];
     if (paper) {
         self.paper = paper;
     }
     else{
-        [self initData];
+        [self initPaper];
     }
 }
 
--(void)initData{
+/**
+ *  网络获取试题
+ */
+-(void)initPaper{
     __weak typeof(self) weakSelf = self;
-    [[PaperDataManager sharedManager]downloadPaperWithParam:_param succeed:^(PaperModel *paper) {
+    [[PaperDataManager sharedManager]getPaperWithParam:_param succeed:^(PaperModel *paper) {
         weakSelf.paper = paper;
     } finished:^{
         NSLog(@"finished");
@@ -206,18 +231,24 @@
     }];
 }
 
-// 交卷
+/**
+ *  交卷
+ */
 -(void)submitPaper{
-    [userAnswers removeAllObjects]; // 清空之前的答案
-//    for (int i=0;i<_dataSource.count; i++) {
-//        PaperQuestion *q = (PaperQuestion*)_dataSource[i];
-//        NSDictionary *dic = @{@(i): @(q.optionSelectedIndex)};
-//        [userAnswers addObject:dic];
-//    }
-    NSLog(@"user answers: %@",userAnswers);
+    // 停止计时
+    _paper.usedTime = [NSString stringWithFormat:@"%ld",_totalUsedTime];
+    [[PaperDataManager sharedManager]submitPaperAnwserWithPaper: _paper PaperParam: _param succeed:^{
+        NSLog(@"交卷成功");
+    } finished:^{
+        
+    } failed:^(NSError *error) {
+        NSLog(@"error: %@", error.localizedDescription);
+    }];
 }
 
-// 评语
+/**
+ *  评语
+ */
 -(void)sendComment{
     
 }
